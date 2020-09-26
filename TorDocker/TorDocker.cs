@@ -80,7 +80,7 @@ namespace TorDocker
                 txtDataLog.AppendText(string.Format("Stop Container - {0} /r /n", log));
 
             }
-        }
+        } 
 
         private void dockerDownload_Click(object sender, EventArgs e)
         {

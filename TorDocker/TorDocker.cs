@@ -1,4 +1,5 @@
 ﻿using MetroFramework.Forms;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,6 +15,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Windows.Data.Json;
 
 namespace TorDocker
 {
@@ -25,7 +27,7 @@ namespace TorDocker
         public int counter = 5;
         public string mylogKey;
         public string Status = "";
-        public string myLocalIP;
+        public static string myLocalIP;
 
         public TorDocker()
         {
@@ -47,7 +49,7 @@ namespace TorDocker
 
             psi.FileName = @"C:\Windows\System32\cmd.exe";
             psi.Verb = "runas";
-            psi.Arguments = "/c " + "docker run -it -p 8118:8118 -p 9050:9050 -d --name myTorProxyServer --rm payamss/torproxy";
+            psi.Arguments = "/c " + "docker run -it -p 8118:8118 -p 9050:9050 -d --name myTorProxyServer --rm payamss/torproxy -n ";
             psi.WindowStyle = ProcessWindowStyle.Hidden;
             try
             {
@@ -398,14 +400,32 @@ namespace TorDocker
             {
                 ip.Text = "HTTP   - " + IPWIFI + " : 8118";
                 ip2.Text = "Socks5 - " + IPWIFI + " : 9050";
-           
+                myLocalIP = IPWIFI;
 
             }
             checkProxy();
         }
+        static public string GetInfo()
+        {
+            try
+            {
+                WebClient mywc = new WebClient();
+                
+                mywc.Proxy = new WebProxy(myLocalIP +":8118", true);
+                return mywc.DownloadString("http://ip-api.com/json/");
 
+            }
+            catch (Exception ex)
+            {
+            return new WebClient().DownloadString("http://ip-api.com/json/");
+
+            }
+        }
         private void btnStats_Click(object sender, EventArgs e)
         {
+            //;
+            dynamic parsedJson =JsonConvert.DeserializeObject(GetInfo());
+            txtDataLog.AppendText(JsonConvert.SerializeObject(parsedJson, Formatting.Indented));
             var psi = new ProcessStartInfo();
             psi.UseShellExecute = false;
             psi.FileName = @"C:\Windows\System32\cmd.exe";
